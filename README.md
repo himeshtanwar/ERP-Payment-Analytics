@@ -71,24 +71,6 @@ The project includes SQL queries for:
 
 ---
 
-## 📁 Project Structure
-
-```
-ERP-Payment-Analytics/
-│
-├── SQL/
-│   ├── basic_queries.sql
-│   ├── intermediate_queries.sql
-│   └── advanced_queries.sql
-│
-├── PowerBI/
-│   └── ERP_Payment_Dashboard.pbix
-│
-├── Screenshots/
-│   └── dashboard.png
-│
-└── README.md
-```
 
 ---
 
