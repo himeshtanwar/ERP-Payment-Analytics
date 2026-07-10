@@ -64,13 +64,6 @@ The project includes SQL queries for:
 - Running Total
 - Duplicate transaction detection
 
----
-
-## 📸 Dashboard Preview
-![Dashboard](hudco payments.png)
-
----
-
 
 ---
 
