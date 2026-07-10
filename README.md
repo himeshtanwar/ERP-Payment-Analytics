@@ -67,7 +67,7 @@ The project includes SQL queries for:
 ---
 
 ## 📸 Dashboard Preview
-![Dashboard](Screenshots/hudco payments.png)
+![Dashboard](hudco payments.png)
 
 ---
 
