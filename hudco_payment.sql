@@ -1,0 +1,132 @@
+create table data(
+ERPCMS_PAY_REF_NO	int,
+ERPCMS_SYS_CODE	varchar(10),
+ERPCMS_BRANCH_CODE int,
+ERPCMS_VEND_CODE	varchar(20),
+ERPCMS_BENE_NAME varchar(300),
+ERPCMS_AMOUNT int,
+ERPCMS_PYMT_DATE date,
+ERPCMS_DB_ACC_NO bigint,
+ERPCMS_CR_ACC_NO bigint,
+ERPCMS_IFSC_CODE varchar(30),
+ERPCMS_ACC_LOC_CODE	 varchar(20),
+ERPCMS_BANK_NAME varchar(100),
+ERPCMS_BENE_MAIL_ADDR1	varchar(200),
+ERPCMS_BENE_MAIL_ADDR2	varchar(200),
+ERPCMS_BENE_MAIL_ADDR3  varchar(200),
+ERPCMS_CITY varchar(200),
+ERPCMS_ZIP_CODE int,
+ERPCMS_REMARKS varchar(200),
+ERPCMS_EMAIL varchar(200),
+ERPCMS_MOBILE_NO	int,
+ERPCMS_BANK_CODE	varchar(50),
+ERPCMS_ENTD_BY	varchar(200),
+ERPCMS_ENTD_ON	date,
+ERPCMS_PROC_STATUS varchar(20),
+ERPCMS_PROC_BY	varchar(30),
+ERPCMS_PROC_ON	varchar(30),
+POST_TRAN_BRN int,
+POST_TRAN_DATE date,
+POST_TRAN_BATCH_NUM	int,
+ERPCMS_AUTH_BY varchar(30),
+ERPCMS_AUTH_ON	date,
+ERPCMS_REJ_BY varchar(100),
+ERPCMS_REJ_ON date,
+ERPCMS_PAY_IDEN varchar(30),
+ERPCMS_PYMNT_REF_NUM varchar(200),
+ERPCMS_ACT_TRAN_REF varchar(200),
+ERPCMS_FAIL_REASON varchar(400),
+ERPCMS_SYS_REF	 varchar(300),
+ERPCMS_CUST_CD	 varchar(300),
+ERPCMS_CUST_NAME varchar(300),
+ERPCMS_LEI_SEN	varchar(300),
+ERPCMS_LEI_SEN_DATE	 date,
+ERPCMS_LEI_BEN varchar(300),
+ERPCMS_LEI_BEN_DATE date
+)
+
+update table data alter ERPCMS_AMOUNT type big
+
+select * from data
+--EASY--
+--Find the total payment amount
+select sum(erpcms_amount) as total_payment_amount from data
+--Count the total number of transactions.
+select count(*) as total_transaction from data
+--Find the total payment amount for each bank.
+select erpcms_bank_name,sum(erpcms_amount) as payment_amount from data group by 1 order by 1
+--Find the top 10 banks based on payment amount.
+select erpcms_bank_name,sum(erpcms_amount) as payment_amount from data group by 1 order by 2 desc limit 10
+--Count the number of transactions for each city.
+select erpcms_city, count(erpcms_amount) from data group by 1 order by 1
+--Find the total payment amount processed by each branch.
+select erpcms_branch_code,sum(erpcms_amount) as total_amount from data group by 1 order by 1
+--Find all failed transactions.
+select * from data where erpcms_proc_status = 'R'
+--Find the top 10 vendors receiving the highest payments.
+select erpcms_vend_code,erpcms_bene_name , sum(erpcms_amount) as amount from data group by 1,2 order by 3 desc limit 10
+
+--MEDIUM--
+select * from data
+--Find the average payment amount for every bank.
+select erpcms_bank_name , round(avg(erpcms_amount),2) as average_payment from data group by 1 order by 1
+--Find monthly payment amount.
+select extract(year from erpcms_pymt_date) as year, extract(month from erpcms_pymt_date) as month, sum(erpcms_amount) as payment_amount from data group by 1,2 order by 1,2
+--Find the branch having the highest total payment.
+select erpcms_branch_code, sum(erpcms_amount) as amount from data group by 1 order by 2 desc limit 1
+--Find the city with the maximum number of transactions.
+select erpcms_city, count(*) as transactions from data group by 1 order by 2 desc limit 1
+--Find vendors who received more than ₹50 Crore.
+select erpcms_vend_code, sum(erpcms_amount) as amount_received from data group by 1 having sum(erpcms_amount)>500000000
+--Find the top 5 payment dates having the highest payment amount.
+select erpcms_pymt_date, sum(erpcms_amount) as amount from data group by 1 order by 2 desc limit 5
+--Find duplicate payment reference numbers.
+select distinct erpcms_pymnt_ref_num , count(erpcms_pymnt_ref_num) as number from data group by 1 having count( erpcms_pymnt_ref_num)>=2
+--Find the percentage contribution of each bank to the total payment.
+select
+erpcms_bank_name,
+sum(erpcms_amount) as amount,
+round(sum(erpcms_amount)*100/
+(
+select sum(erpcms_amount) from data
+),2) as percentage
+from data
+group by 1 order by 3 desc
+
+--HARD--
+select*from data
+--Rank vendors.
+select erpcms_bene_name,sum(erpcms_amount),
+rank() over( order by sum(erpcms_amount) desc ) as ranking
+from data group by 1
+--Top 3 vendors in every city.
+with cte as (
+select erpcms_city,erpcms_bene_name, sum(erpcms_amount), row_number() over(partition by erpcms_city order by sum(erpcms_amount) desc ) as rn
+from data group by 1,2
+)
+select * from cte where rn<=3
+--Vendors receiving payments from multiple branches.
+select erpcms_vend_code,sum(erpcms_amount),count(distinct erpcms_branch_code) from data group by 1 having count( distinct erpcms_branch_code)>1
+
+--Bank with highest average payment.
+select  erpcms_bank_name, avg(erpcms_amount) from data group by 1 order by 2 desc limit 1
+--Highest paying bank in every city.
+with query as(
+select 
+erpcms_city,
+erpcms_bank_name,
+sum(erpcms_amount),
+row_number() over(partition by erpcms_bank_name order by sum(erpcms_amount) desc) as rn
+from data group by 1,2
+)
+select * from query where rn=1
+
+
+
+
+
+
+
+
+
+
