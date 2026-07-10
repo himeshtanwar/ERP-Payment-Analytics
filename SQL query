@@ -51,37 +51,53 @@ select * from data
 --EASY--
 --Find the total payment amount
 select sum(erpcms_amount) as total_payment_amount from data
+
 --Count the total number of transactions.
 select count(*) as total_transaction from data
+
+
 --Find the total payment amount for each bank.
 select erpcms_bank_name,sum(erpcms_amount) as payment_amount from data group by 1 order by 1
+
 --Find the top 10 banks based on payment amount.
 select erpcms_bank_name,sum(erpcms_amount) as payment_amount from data group by 1 order by 2 desc limit 10
+
 --Count the number of transactions for each city.
 select erpcms_city, count(erpcms_amount) from data group by 1 order by 1
+
 --Find the total payment amount processed by each branch.
 select erpcms_branch_code,sum(erpcms_amount) as total_amount from data group by 1 order by 1
+
 --Find all failed transactions.
 select * from data where erpcms_proc_status = 'R'
+
 --Find the top 10 vendors receiving the highest payments.
 select erpcms_vend_code,erpcms_bene_name , sum(erpcms_amount) as amount from data group by 1,2 order by 3 desc limit 10
+
 
 --MEDIUM--
 select * from data
 --Find the average payment amount for every bank.
 select erpcms_bank_name , round(avg(erpcms_amount),2) as average_payment from data group by 1 order by 1
+
 --Find monthly payment amount.
 select extract(year from erpcms_pymt_date) as year, extract(month from erpcms_pymt_date) as month, sum(erpcms_amount) as payment_amount from data group by 1,2 order by 1,2
+
 --Find the branch having the highest total payment.
 select erpcms_branch_code, sum(erpcms_amount) as amount from data group by 1 order by 2 desc limit 1
+
 --Find the city with the maximum number of transactions.
 select erpcms_city, count(*) as transactions from data group by 1 order by 2 desc limit 1
+
 --Find vendors who received more than ₹50 Crore.
 select erpcms_vend_code, sum(erpcms_amount) as amount_received from data group by 1 having sum(erpcms_amount)>500000000
+
 --Find the top 5 payment dates having the highest payment amount.
 select erpcms_pymt_date, sum(erpcms_amount) as amount from data group by 1 order by 2 desc limit 5
+
 --Find duplicate payment reference numbers.
 select distinct erpcms_pymnt_ref_num , count(erpcms_pymnt_ref_num) as number from data group by 1 having count( erpcms_pymnt_ref_num)>=2
+
 --Find the percentage contribution of each bank to the total payment.
 select
 erpcms_bank_name,
@@ -99,17 +115,20 @@ select*from data
 select erpcms_bene_name,sum(erpcms_amount),
 rank() over( order by sum(erpcms_amount) desc ) as ranking
 from data group by 1
+
 --Top 3 vendors in every city.
 with cte as (
 select erpcms_city,erpcms_bene_name, sum(erpcms_amount), row_number() over(partition by erpcms_city order by sum(erpcms_amount) desc ) as rn
 from data group by 1,2
 )
 select * from cte where rn<=3
+
 --Vendors receiving payments from multiple branches.
 select erpcms_vend_code,sum(erpcms_amount),count(distinct erpcms_branch_code) from data group by 1 having count( distinct erpcms_branch_code)>1
 
 --Bank with highest average payment.
 select  erpcms_bank_name, avg(erpcms_amount) from data group by 1 order by 2 desc limit 1
+
 --Highest paying bank in every city.
 with query as(
 select 
